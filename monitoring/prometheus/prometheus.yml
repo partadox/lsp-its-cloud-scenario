@@ -1,0 +1,53 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+           - alertmanager:9093
+
+rule_files:
+  - "alert_rules.yml"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  # API Service - DNS service discovery untuk multiple instances
+  - job_name: 'api-service'
+    metrics_path: '/metrics'
+    dns_sd_configs:
+      - names:
+          - 'api'
+        type: 'A'
+        port: 3000
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '(.+):.*'
+        replacement: '${1}'
+
+  # Web App - DNS service discovery untuk multiple instances
+  - job_name: 'web-app'
+    metrics_path: '/metrics'
+    dns_sd_configs:
+      - names:
+          - 'webapp'
+        type: 'A'
+        port: 80
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '(.+):.*'
+        replacement: '${1}'

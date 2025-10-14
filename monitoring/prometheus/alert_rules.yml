@@ -1,0 +1,78 @@
+groups:
+  - name: host
+    rules:
+      - alert: HighCpuLoad
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High CPU load (instance {{ $labels.instance }})
+          description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: HighMemoryLoad
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High memory load (instance {{ $labels.instance }})
+          description: "Memory load is > 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: HighDiskUsage
+        expr: (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High disk usage (instance {{ $labels.instance }})
+          description: "Disk usage is > 85%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+  - name: containers
+    rules:
+      - alert: ContainerHighCpuUsage
+        expr: (sum by(container_name) (rate(container_cpu_usage_seconds_total[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Container CPU usage (instance {{ $labels.instance }})
+          description: "Container CPU usage is > 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: ContainerHighMemoryUsage
+        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Container memory usage (instance {{ $labels.instance }})
+          description: "Container memory usage is > 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+  - name: application
+    rules:
+      - alert: HighRequestLatency
+        expr: api_http_request_duration_ms{quantile="0.95"} > 500
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: High request latency (instance {{ $labels.instance }})
+          description: "95th percentile of request latency is > 500ms\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: HighErrorRate
+        expr: sum(rate(api_http_requests_total{status_code=~"5.."}[5m])) / sum(rate(api_http_requests_total[5m])) * 100 > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: High error rate (instance {{ $labels.instance }})
+          description: "Error rate is > 5%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Service down (instance {{ $labels.instance }})
+          description: "Service is down\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"

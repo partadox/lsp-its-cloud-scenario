@@ -1,0 +1,26 @@
+{
+  "name": "cloud-computing-web-app",
+  "version": "1.0.0",
+  "description": "Web application for Cloud Computing Practical",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "echo 'No build required for demo'",
+    "test": "echo 'No tests implemented yet'"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.2",
+    "prom-client": "^14.2.0",
+    "morgan": "^1.10.0",
+    "express-winston": "^4.2.0",
+    "winston": "^3.11.0",
+    "compression": "^1.7.4",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5",
+    "cookie-parser": "^1.4.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
